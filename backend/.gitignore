@@ -1,0 +1,96 @@
+# ===========================
+# PYTHON / FASTAPI
+# ===========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.python-version
+
+# Byte-compiled / optimized
+*.so
+
+# Cache
+.cache/
+pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pytest_cache/
+
+# ===========================
+# NODE / FRONTEND (React/Vite)
+# ===========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun.lockb
+
+# Build output
+dist/
+build/
+coverage/
+.vite/
+.vscode/
+
+# ===========================
+# PRISMA
+# ===========================
+prisma/.cache/
+prisma/migrations/*/migration.sql
+prisma/migrations/dev.db
+generated/
+# Prisma client JS
+node_modules/.prisma/
+# Prisma Python client
+.prisma/
+
+# ===========================
+# ENVIRONMENT FILES
+# ===========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+
+# ===========================
+# IDE / EDITOR
+# ===========================
+.vscode/
+.idea/
+*.swp
+
+# ===========================
+# OS-SPECIFIC
+# ===========================
+.DS_Store
+Thumbs.db
+
+# ===========================
+# DOCKER
+# ===========================
+docker-data/
+postgres_data/
+*.pid
+
+# ===========================
+# LOG FILES
+# ===========================
+*.log
+logs/

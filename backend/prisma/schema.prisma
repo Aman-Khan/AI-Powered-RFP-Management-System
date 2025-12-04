@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String
+  name       String?
+  createdAt  DateTime @default(now())
+
+  rfps       RFP[]
+}
+
+model RFP {
+  id                     String   @id @default(uuid())
+  userId                 String
+  title                  String
+  description            String?
+  structuredRequirements Json?
+  status                 String   @default("draft")
+  createdAt              DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id])
+  rfpVendors RFPVendor[]
+}
+
+model Vendor {
+  id            String   @id @default(uuid())
+  name          String
+  email         String?
+  phone         String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  rfpVendors    RFPVendor[]
+}
+
+model RFPVendor {
+  id              String    @id @default(uuid())
+  rfpId           String
+  vendorId        String
+  status          String    @default("sent")
+  sentAt          DateTime?
+  lastReminderAt  DateTime?
+
+  rfp        RFP        @relation(fields: [rfpId], references: [id])
+  vendor     Vendor     @relation(fields: [vendorId], references: [id])
+  proposals  Proposal[]
+  emailLogs  EmailLog[]
+}
+
+model Proposal {
+  id            String   @id @default(uuid())
+  rfpVendorId   String
+  rawText       String?
+  extractedData Json?
+  attachments   Json?
+  submittedAt   DateTime @default(now())
+
+  rfpVendor  RFPVendor @relation(fields: [rfpVendorId], references: [id])
+}
+
+model EmailLog {
+  id            String   @id @default(uuid())
+  rfpVendorId   String?
+  direction     String
+  subject       String?
+  body          String?
+  attachments   Json?
+  createdAt     DateTime @default(now())
+
+  rfpVendor   RFPVendor? @relation(fields: [rfpVendorId], references: [id])
+}

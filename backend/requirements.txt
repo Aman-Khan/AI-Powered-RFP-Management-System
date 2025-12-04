@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+prisma
+pydantic
+requests
+email-validator
+jinja2
+httpx
+openai
