@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.core.prisma import prisma
-from app.api import rfp, vendor, email
+from app.api import rfp, vendor, email, user
 
 
 @asynccontextmanager
@@ -25,3 +25,4 @@ app = FastAPI(
 app.include_router(rfp.router, prefix="/rfp")
 app.include_router(vendor.router, prefix="/vendor")
 app.include_router(email.router, prefix="/email")
+app.include_router(user.router, prefix="/user")
