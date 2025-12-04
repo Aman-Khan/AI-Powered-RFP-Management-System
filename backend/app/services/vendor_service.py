@@ -1,6 +1,7 @@
 from app.core.prisma import prisma
 from app.utils.ids import new_id
 from typing import Optional, Dict, Any, List
+from prisma import Json
 
 # Add a vendor
 async def add_vendor(name: str, email: Optional[str] = None, phone: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
@@ -10,7 +11,7 @@ async def add_vendor(name: str, email: Optional[str] = None, phone: Optional[str
             "name": name,
             "email": email,
             "phone": phone,
-            "metadata": metadata or {}
+            "metadata": Json(metadata) or {}
         }
     )
 
@@ -24,16 +25,26 @@ async def get_vendor(vendor_id: str):
     return vendor
 
 # Update vendor
-async def update_vendor(vendor_id: str, name: Optional[str] = None, email: Optional[str] = None, phone: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
+async def update_vendor(
+    vendor_id: str,
+    name: Optional[str] = None,
+    email: Optional[str] = None,
+    phone: Optional[str] = None,
+    metadata: Optional[Dict[str, Any]] = None
+):
     update_data = {}
+
     if name is not None:
         update_data["name"] = name
+
     if email is not None:
         update_data["email"] = email
+
     if phone is not None:
         update_data["phone"] = phone
+
     if metadata is not None:
-        update_data["metadata"] = metadata
+        update_data["metadata"] = Json(metadata)
 
     return await prisma.vendor.update(
         where={"id": vendor_id},

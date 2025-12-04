@@ -1,13 +1,13 @@
 from fastapi import HTTPException
 from pydantic import BaseModel
-from app.core.prisma import prisma
-from app.utils.ids import new_id
-from app.core.llm.factory import get_llm
-import json
 from typing import Any, Dict, Optional, List
 from prisma import Json
+from app.core.prisma import prisma
+from app.core.llm.factory import get_llm
+from app.utils.ids import new_id
+import json
 
-# --- Shared Models ---
+# ----------- Models -----------
 
 class RFPCreateRequest(BaseModel):
     text: str
@@ -17,10 +17,10 @@ class RFPResponse(BaseModel):
     id: str
     userId: str
     title: str
-    description: Optional[str] = None
-    structuredRequirements: Optional[Dict[str, Any]] = None
+    description: Optional[str]
+    structuredRequirements: Optional[Dict[str, Any]]
 
-# --- Function to Create a New RFP (Core Logic) ---
+# ----------- Create RFP -----------
 
 async def create_rfp(rfp: RFPCreateRequest):
     user = await prisma.user.find_unique(where={"id": rfp.userId})
@@ -28,69 +28,74 @@ async def create_rfp(rfp: RFPCreateRequest):
         raise HTTPException(status_code=404, detail="User not found")
 
     llm = get_llm()
-    
+
     prompt = f"""
-    Analyze the following procurement request and convert it into a single JSON object.
-    
-    The object must have three top-level fields:
-    1. 'title': A concise title for the RFP.
-    2. 'description': A brief, summary description of the request.
-    3. 'structured_requirements': A dictionary containing detailed requirements.
-    
-    Detailed requirements fields must include: budget, items, quantities, warranty, delivery_days, payment_terms.
-    
-    Input Request: {rfp.text}
+    Convert this procurement description into JSON with:
+    - title
+    - description
+    - structured_requirements {{ budget, items, quantities, warranty, delivery_days, payment_terms }}
+
+    Input: {rfp.text}
     """
-    
-    full_structured_text = await llm.generate_rfp_structure(prompt) 
 
-    full_data: Dict[str, Any] | None = None
-    
+    llm_output = await llm.generate_rfp_structure(prompt)
+
     try:
-        full_data = json.loads(full_structured_text)
-    except json.JSONDecodeError:
-        try:
-            cleaned = full_structured_text.strip().replace("```json", "").replace("```", "")
-            full_data = json.loads(cleaned)
-        except json.JSONDecodeError:
-            print(f"ERROR: Could not parse full structured JSON from LLM: {full_structured_text}")
-            full_data = None 
+        cleaned = llm_output.replace("```json", "").replace("```", "").strip()
+        parsed = json.loads(cleaned)
+    except Exception:
+        raise HTTPException(status_code=500, detail="LLM returned invalid JSON")
 
-    
-    title = full_data.get('title', f"Auto-generated RFP for {rfp.text[:50]}...") if full_data else f"Auto-generated RFP for {rfp.text[:50]}..."
-    description = full_data.get('description', rfp.text) if full_data else rfp.text
-    structured_requirements_data = full_data.get('structured_requirements') if full_data else None
-
-    # Handle nullable Json explicitly for the structured requirements field
-    structured_payload = (
-        structured_requirements_data 
-        if structured_requirements_data is not None 
-        else Json.from_none()
-    )
-    
-    created_rfp = await prisma.rfp.create(
+    created = await prisma.rfp.create(
         data={
             "id": new_id(),
-            "title": title,
-            "description": description,
-            "structuredRequirements": Json(structured_payload), 
+            "title": parsed.get("title", "Auto-generated RFP"),
+            "description": parsed.get("description", rfp.text),
+            "structuredRequirements": parsed.get("structured_requirements"),
             "userId": rfp.userId
         }
     )
+    
+    return created
 
-    return created_rfp
+# ----------- Get RFPs (Paginated + Sorted) -----------
 
-# --- Function to Get All RFPs for a User (Core Logic) ---
-
-async def get_all_rfps(userId: str) -> List[RFPResponse]:
-    """
-    Retrieves all RFPs associated with a specific user ID.
-    """
-    # Query Prisma for all RFPs where the userId matches the path parameter
+async def get_all_rfps(userId: str, skip: int = 0, limit: int = 20) -> List[RFPResponse]:
     rfps = await prisma.rfp.find_many(
-        where={
-            "userId": userId
+        where={"userId": userId},
+        skip=skip,
+        take=limit,
+        order=[{"createdAt": "desc"}]   # ✅ correct syntax
+    )
+    return rfps
+
+
+# ----------- Update RFP -----------
+
+async def update_rfp(rfpId: str, structuredRequirements: dict):
+    # Validate JSON
+    if not isinstance(structuredRequirements, dict):
+        raise HTTPException(status_code=400, detail="structuredRequirements must be a valid JSON object")
+
+    existing = await prisma.rfp.find_unique(where={"id": rfpId})
+    if not existing:
+        raise HTTPException(status_code=404, detail="RFP not found")
+
+    updated = await prisma.rfp.update(
+        where={"id": rfpId},
+        data={
+            "structuredRequirements": structuredRequirements
         }
     )
-    
-    return rfps
+    return updated
+
+# ----------- Delete RFP -----------
+
+async def delete_rfp(rfpId: str):
+    existing = await prisma.rfp.find_unique(where={"id": rfpId})
+    if not existing:
+        raise HTTPException(status_code=404, detail="RFP not found")
+
+    await prisma.rfp.delete(where={"id": rfpId})
+
+    return {"success": True, "message": "RFP deleted successfully"}

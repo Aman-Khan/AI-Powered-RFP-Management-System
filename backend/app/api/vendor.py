@@ -1,13 +1,24 @@
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 from app.services.vendor_service import add_vendor, get_all_vendors, get_vendor, update_vendor, delete_vendor
+from pydantic import BaseModel
+
+class VendorCreateRequest(BaseModel):
+    name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+class VendorUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
 
 router = APIRouter(tags=["Vendor Management"])
 
 # Add vendor
 @router.post("/add")
-async def add_vendor_endpoint(name: str, email: Optional[str] = None, phone: Optional[str] = None):
-    return await add_vendor(name, email, phone)
+async def add_vendor_endpoint(body: VendorCreateRequest):
+    return await add_vendor(body.name, body.email, body.phone)
 
 # Get all vendors
 @router.get("/")
@@ -24,11 +35,17 @@ async def get_vendor_endpoint(vendor_id: str):
 
 # Update vendor
 @router.put("/{vendor_id}")
-async def update_vendor_endpoint(vendor_id: str, name: Optional[str] = None, email: Optional[str] = None, phone: Optional[str] = None):
+async def update_vendor_endpoint(vendor_id: str, body: VendorUpdateRequest):
     vendor = await get_vendor(vendor_id)
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")
-    return await update_vendor(vendor_id, name, email, phone)
+
+    return await update_vendor(
+        vendor_id,
+        name=body.name,
+        email=body.email,
+        phone=body.phone
+    )
 
 # Delete vendor
 @router.delete("/{vendor_id}")

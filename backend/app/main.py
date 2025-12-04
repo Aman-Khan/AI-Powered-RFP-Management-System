@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.prisma import prisma
 from app.api import rfp, vendor, email, user
@@ -6,13 +7,11 @@ from app.api import rfp, vendor, email, user
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     await prisma.connect()
     print("Prisma connected.")
     
     yield
     
-    # Shutdown
     await prisma.disconnect()
     print("Prisma disconnected.")
 
@@ -20,6 +19,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="RFP AI Backend",
     lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(rfp.router, prefix="/rfp")

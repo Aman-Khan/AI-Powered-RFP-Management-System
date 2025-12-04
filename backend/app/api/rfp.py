@@ -1,24 +1,39 @@
-from fastapi import APIRouter, HTTPException
-from typing import List
-
-# Import both the function and the BaseModel from the service file
-from app.services.rfp_service import create_rfp, get_all_rfps, RFPCreateRequest, RFPResponse
+from fastapi import APIRouter, HTTPException, Query
+from typing import List, Optional
+from app.services.rfp_service import (
+    create_rfp, 
+    get_all_rfps, 
+    update_rfp,
+    delete_rfp,
+    RFPCreateRequest, 
+    RFPResponse
+)
 
 router = APIRouter(tags=["RFP Management"])
 
+# Create RFP
 @router.post("/create", response_model=RFPResponse)
 async def create_rfp_endpoint(body: RFPCreateRequest):
-    """
-    Endpoint to create a new RFP.
-    Calls the core logic in the rfp_service.
-    """
-    # Pass the single 'body' object (RFPCreateRequest instance) to the service function.
     return await create_rfp(body)
 
+# Get All RFPs (Paginated)
 @router.get("/all/{userId}", response_model=List[RFPResponse])
-async def get_all_rfps_endpoint(userId: str):
-    """
-    Retrieves all RFPs associated with a specific user ID.
-    Calls the core logic in the rfp_service.
-    """
-    return await get_all_rfps(userId)
+async def get_all_rfps_endpoint(
+    userId: str,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100)
+):
+    return await get_all_rfps(userId, skip, limit)
+
+# Update RFP
+@router.put("/{rfpId}", response_model=RFPResponse)
+async def update_rfp_endpoint(
+    rfpId: str,
+    structuredRequirements: dict
+):
+    return await update_rfp(rfpId, structuredRequirements)
+
+# Delete RFP
+@router.delete("/{rfpId}", response_model=dict)
+async def delete_rfp_endpoint(rfpId: str):
+    return await delete_rfp(rfpId)
