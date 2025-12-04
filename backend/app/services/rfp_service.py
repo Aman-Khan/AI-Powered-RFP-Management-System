@@ -51,7 +51,7 @@ async def create_rfp(rfp: RFPCreateRequest):
             "id": new_id(),
             "title": parsed.get("title", "Auto-generated RFP"),
             "description": parsed.get("description", rfp.text),
-            "structuredRequirements": parsed.get("structured_requirements"),
+            "structuredRequirements": Json(parsed.get("structured_requirements")),
             "userId": rfp.userId
         }
     )
@@ -99,3 +99,6 @@ async def delete_rfp(rfpId: str):
     await prisma.rfp.delete(where={"id": rfpId})
 
     return {"success": True, "message": "RFP deleted successfully"}
+
+async def get_rfp_by_id(rfpId: str):
+    return await prisma.rfp.find_unique(where={"id": rfpId})

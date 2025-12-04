@@ -1,9 +1,8 @@
 from app.core.prisma import prisma
 from app.utils.ids import new_id
 from typing import Optional, Dict, Any, List
-from prisma import Json
 
-# Add a vendor
+# ---------------- Add Vendor ----------------
 async def add_vendor(name: str, email: Optional[str] = None, phone: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
     return await prisma.vendor.create(
         data={
@@ -11,38 +10,48 @@ async def add_vendor(name: str, email: Optional[str] = None, phone: Optional[str
             "name": name,
             "email": email,
             "phone": phone,
-            "metadata": Json(metadata) or {}
+            "metadata": metadata or {}
         }
     )
 
-# Get all vendors
-async def get_all_vendors():
-    return await prisma.vendor.find_many()
+# ---------------- Get Vendors (Paginated + Search) ----------------
+async def get_all_vendors(search: Optional[str] = None, skip: int = 0, limit: int = 20):
+    filters = {}
 
-# Get vendor by ID
+    if search:
+        filters = {
+            "OR": [
+                {"name": {"contains": search, "mode": "insensitive"}},
+                {"email": {"contains": search, "mode": "insensitive"}},
+                {"phone": {"contains": search, "mode": "insensitive"}},
+            ]
+        }
+
+    vendors = await prisma.vendor.find_many(
+        where=filters,
+        skip=skip,
+        take=limit,
+    )
+
+    # Fallback sorting because orderBy may not be supported
+    vendors.sort(key=lambda v: v.createdAt, reverse=True)
+
+    return vendors
+
+# ---------------- Get Vendor ----------------
 async def get_vendor(vendor_id: str):
-    vendor = await prisma.vendor.find_unique(where={"id": vendor_id})
-    return vendor
+    return await prisma.vendor.find_unique(where={"id": vendor_id})
 
-# Update vendor
-async def update_vendor(
-    vendor_id: str,
-    name: Optional[str] = None,
-    email: Optional[str] = None,
-    phone: Optional[str] = None,
-    metadata: Optional[Dict[str, Any]] = None
-):
+# ---------------- Update Vendor ----------------
+async def update_vendor(vendor_id: str, name=None, email=None, phone=None, metadata=None):
     update_data = {}
 
     if name is not None:
         update_data["name"] = name
-
     if email is not None:
         update_data["email"] = email
-
     if phone is not None:
         update_data["phone"] = phone
-
     if metadata is not None:
         update_data["metadata"] = Json(metadata)
 
@@ -51,6 +60,6 @@ async def update_vendor(
         data=update_data
     )
 
-# Delete vendor
+# ---------------- Delete Vendor ----------------
 async def delete_vendor(vendor_id: str):
     return await prisma.vendor.delete(where={"id": vendor_id})
