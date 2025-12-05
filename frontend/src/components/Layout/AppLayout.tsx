@@ -158,6 +158,24 @@ export default function AppLayout() {
                     <ListItemText primary="Users" />
                 </ListItem>
 
+                <ListItem
+                    component={NavLink}
+                    to="/rfp-vendors"
+                    sx={{
+                        borderRadius: 1,
+                        mx: 1,
+                        "&.active": {
+                            backgroundColor: "primary.main",
+                            color: "white",
+                            "& .MuiListItemIcon-root": { color: "white" }
+                        }
+                    }}
+                >
+                    <ListItemIcon><SendIcon /></ListItemIcon>
+                    <ListItemText primary="RFP Requests" />
+                </ListItem>
+
+
             </List>
 
 

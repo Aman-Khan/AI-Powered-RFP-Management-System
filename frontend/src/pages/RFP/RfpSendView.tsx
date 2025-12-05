@@ -10,13 +10,14 @@ import {
 } from "@mui/material";
 
 import ReplayIcon from "@mui/icons-material/Replay";
-
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useRfpById, useGenerateEmail } from "../../api/rfp";
 import { useToast } from "../../components/Toast/MuiToastProvider";
 import { useTypewriter } from "../../hooks/useTypewriter";
+import RfpVendorSelectModal from "./RfpVendorSelectModal";
 
+// Inject animation only once
 const waveKeyframes = `
 @keyframes wave {
   0% { background-position: 200% 0; }
@@ -24,15 +25,16 @@ const waveKeyframes = `
 }
 `;
 
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.innerHTML = waveKeyframes;
-  document.head.appendChild(style);
+if (typeof document !== "undefined" && !document.getElementById("wave-style")) {
+    const style = document.createElement("style");
+    style.id = "wave-style";
+    style.innerHTML = waveKeyframes;
+    document.head.appendChild(style);
 }
-
 
 export default function RfpSendView() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { showToast } = useToast();
 
     const { data: rfp, isLoading } = useRfpById(id!);
@@ -42,49 +44,50 @@ export default function RfpSendView() {
     const [typedEmail, setTypedEmail] = useState("");
     const [loadingEmail, setLoadingEmail] = useState(false);
     const [isTypingDone, setIsTypingDone] = useState(false);
+    const [openVendorModal, setOpenVendorModal] = useState(false);
 
-    // FIX → Always keep preview box constant height
     const PREVIEW_HEIGHT = "350px";
 
-    // TYPEWRITER
+    // ——— Typewriter Effect ———
     useTypewriter({
         text: finalEmail,
-        speed: 15,
+        speed: 18,
         onUpdate: setTypedEmail,
         onDone: () => setIsTypingDone(true),
     });
 
+    // ——— Load Email Template ———
     const loadEmailTemplate = () => {
         setLoadingEmail(true);
         setIsTypingDone(false);
-
-        // Keep UI stable
         setTypedEmail("Generating template...");
 
         generateEmail.mutate(
             { rfpId: id! },
             {
                 onSuccess: (res) => {
-                    const fullEmail =
-                        `${res.subject}\n\n${res.content}\n\n${res.footer}`;
-
-                    setFinalEmail(fullEmail);
-
-                    // Stop "loading..." blink but keep height stable
+                    const full = `${res.subject}\n\n${res.content}\n\n${res.footer}`;
+                    setFinalEmail(full);
                     setLoadingEmail(false);
                 },
                 onError: () => {
                     showToast("Failed to generate email template", "error");
                     setLoadingEmail(false);
-                }
+                },
             }
         );
     };
 
-    // Load once
     useEffect(() => {
         if (rfp) loadEmailTemplate();
     }, [rfp]);
+
+    // ——— Navigate to Vendor Send Page ———
+    const handleGoToVendorPage = () => {
+        navigate(`/rfp/send/${id}/vendors`, {
+            state: { emailBody: typedEmail }
+        });
+    };
 
     if (isLoading || !rfp) {
         return (
@@ -96,7 +99,14 @@ export default function RfpSendView() {
 
     return (
         <Box display="flex" gap={3}>
-            {/* LEFT PANE */}
+            <RfpVendorSelectModal
+                open={openVendorModal}
+                onClose={() => setOpenVendorModal(false)}
+                emailBody={typedEmail}
+                rfpId={id!}
+            />
+
+            {/* LEFT SIDEBAR */}
             <Card sx={{ width: "45%" }}>
                 <CardContent>
                     <Typography variant="h5" fontWeight={700}>
@@ -114,10 +124,9 @@ export default function RfpSendView() {
                     <pre
                         style={{
                             background: "#f7f7f7",
-                            padding: "12px",
+                            padding: 12,
                             borderRadius: 6,
                             whiteSpace: "pre-wrap",
-                            fontSize: "0.9rem",
                         }}
                     >
                         {JSON.stringify(rfp.structuredRequirements, null, 2)}
@@ -125,7 +134,7 @@ export default function RfpSendView() {
                 </CardContent>
             </Card>
 
-            {/* RIGHT PANE */}
+            {/* RIGHT - EMAIL PREVIEW */}
             <Card sx={{ width: "55%" }}>
                 <CardContent>
                     <Box display="flex" justifyContent="space-between">
@@ -138,9 +147,8 @@ export default function RfpSendView() {
                         </IconButton>
                     </Box>
 
-                    {/* FIXED SIZE CONTAINER */}
+                    {/* FIXED HEIGHT CONTAINER */}
                     <Box sx={{ minHeight: PREVIEW_HEIGHT }}>
-                        {/* While typing OR generating */}
                         {(!isTypingDone || loadingEmail) ? (
                             <Box
                                 sx={{
@@ -148,31 +156,26 @@ export default function RfpSendView() {
                                     padding: 2,
                                     border: "1px solid #ccc",
                                     borderRadius: 2,
-                                    background: "#fff",
                                     fontFamily: "monospace",
                                     whiteSpace: "pre-wrap",
                                     overflowY: "auto",
                                 }}
                             >
-                                {/* {loadingEmail ? <BlinkingText /> : typedEmail} */}
                                 {loadingEmail ? <WaveLoadingText /> : typedEmail}
-
                             </Box>
                         ) : (
-                            // Editable AFTER typing completes
                             <textarea
                                 value={typedEmail}
                                 onChange={(e) => setTypedEmail(e.target.value)}
                                 style={{
                                     width: "100%",
                                     height: PREVIEW_HEIGHT,
-                                    padding: "12px",
+                                    padding: 12,
                                     border: "1px solid #ccc",
-                                    borderRadius: "6px",
+                                    borderRadius: 6,
                                     fontFamily: "monospace",
-                                    resize: "none",
                                     whiteSpace: "pre-wrap",
-                                    overflowY: "auto"
+                                    overflowY: "auto",
                                 }}
                             />
                         )}
@@ -182,9 +185,9 @@ export default function RfpSendView() {
                         variant="contained"
                         size="large"
                         sx={{ mt: 2 }}
-                        onClick={() => showToast("Email sent!", "success")}
+                        onClick={handleGoToVendorPage}
                     >
-                        Send Email
+                        Continue → Select Vendors
                     </Button>
                 </CardContent>
             </Card>
@@ -193,32 +196,20 @@ export default function RfpSendView() {
 }
 
 function WaveLoadingText() {
-  return (
-    <div style={{ position: "relative", overflow: "hidden", width: "fit-content" }}>
-      <span
-        style={{
-          fontFamily: "monospace",
-          fontSize: "1rem",
-          background: "linear-gradient(90deg, #999 20%, #ccc 40%, #999 60%)",
-          backgroundSize: "200% 100%",
-          animation: "wave 2.2s ease-in-out infinite", // slower wave
-          WebkitBackgroundClip: "text",
-          color: "transparent",
-        }}
-      >
-        Generating template...
-      </span>
-
-      {/* Keyframes */}
-      <style>
-        {`
-          @keyframes wave {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-          }
-        `}
-      </style>
-    </div>
-  );
+    return (
+        <div style={{ overflow: "hidden", width: "fit-content" }}>
+            <span
+                style={{
+                    fontFamily: "monospace",
+                    background: "linear-gradient(90deg, #bbb 20%, #eee 50%, #bbb 80%)",
+                    backgroundSize: "200% 100%",
+                    animation: "wave 3.5s ease-in-out infinite",
+                    WebkitBackgroundClip: "text",
+                    color: "transparent",
+                }}
+            >
+                Generating template...
+            </span>
+        </div>
+    );
 }
-

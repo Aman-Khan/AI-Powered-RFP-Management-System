@@ -1,6 +1,7 @@
 from app.core.prisma import prisma
 from app.utils.ids import new_id
 from typing import Optional, Dict, Any, List
+from prisma import Json
 
 # ---------------- Add Vendor ----------------
 async def add_vendor(name: str, email: Optional[str] = None, phone: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
@@ -10,7 +11,7 @@ async def add_vendor(name: str, email: Optional[str] = None, phone: Optional[str
             "name": name,
             "email": email,
             "phone": phone,
-            "metadata": metadata or {}
+            "metadata": Json(metadata) or {}
         }
     )
 

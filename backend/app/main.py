@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.prisma import prisma
-from app.api import rfp, vendor, email, user
+from app.api import rfp, vendor, email, user, rfp_vendor
 
 
 @asynccontextmanager
@@ -33,3 +33,4 @@ app.include_router(rfp.router, prefix="/rfp")
 app.include_router(vendor.router, prefix="/vendor")
 app.include_router(email.router, prefix="/email")
 app.include_router(user.router, prefix="/user")
+app.include_router(rfp_vendor.router, prefix="/rfp-vendor")
