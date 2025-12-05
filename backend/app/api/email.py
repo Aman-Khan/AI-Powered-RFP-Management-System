@@ -1,17 +1,23 @@
-from fastapi import APIRouter, Request
-from app.services.proposal_service import save_vendor_proposal
+from fastapi import APIRouter
+from app.services.email_imap_service import fetch_incoming_emails
+from app.services.email_smtp_service import send_email_smtp
+from pydantic import BaseModel
 
-router = APIRouter()
+router = APIRouter(tags=["Email Management"])
 
-@router.post("/inbound")
-async def inbound_email(request: Request):
-    body = await request.form()
-    from_email = body.get("from")
-    text = body.get("text")
+class SendEmailRequest(BaseModel):
+    to_emails: list[str]
+    subject: str
+    content: str
 
-    # TODO: map to the correct rfp_vendor_id
-    rfp_vendor_id = "HARDCODED_FOR_NOW"
+@router.post("/send")
+async def send_email(payload: SendEmailRequest):
+    return await send_email_smtp(
+        to_emails=payload.to_emails,
+        subject=payload.subject,
+        content=payload.content
+    )
 
-    await save_vendor_proposal(rfp_vendor_id, text)
-
-    return {"status": "ok"}
+@router.get("/received")
+def get_received_emails():
+    return fetch_incoming_emails()
