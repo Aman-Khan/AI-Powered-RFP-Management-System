@@ -73,41 +73,76 @@ export default function RfpVendorTable() {
                     <TableRow>
                       <TableCell colSpan={5} style={{ paddingBottom: 0, paddingTop: 0 }}>
                         <Collapse in={expanded} timeout="auto" unmountOnExit>
-                          <Box m={2}>
-                            <Typography variant="h6">Details</Typography>
+                          <Box mt={3}>
+                            <Typography variant="h6" fontWeight={700}>
+                              Email Conversation
+                            </Typography>
 
-                            <Box mt={1}>
-                              <strong>Vendor Email:</strong> {rv.vendor?.email}
-                            </Box>
+                            {rv.emailLogs?.length === 0 && (
+                              <Box mt={1}>
+                                <em>No email communication yet.</em>
+                              </Box>
+                            )}
 
-                            <Box mt={1}>
-                              <strong>RFP Description:</strong>
-                              <div>{rv.rfp?.description}</div>
-                            </Box>
+                            <Box
+                              mt={2}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 2,
+                                maxHeight: 400,
+                                overflowY: "auto",
+                                pr: 1
+                              }}
+                            >
+                              {rv.emailLogs
+                                ?.sort((a: any, b: any) => new Date(a.createdAt) - new Date(b.createdAt))
+                                .map((log: any) => {
+                                  const isSent = log.direction === "outgoing";
+                                  return (
+                                    <Box
+                                      key={log.id}
+                                      sx={{
+                                        maxWidth: "75%",
+                                        alignSelf: isSent ? "flex-start" : "flex-end",
+                                        bgcolor: isSent ? "#e3f2fd" : "#e8f5e9",
+                                        borderLeft: `5px solid ${isSent ? "#1976d2" : "#2e7d32"}`,
+                                        p: 2,
+                                        borderRadius: 2,
+                                        boxShadow: 1
+                                      }}
+                                    >
+                                      {/* Direction Label */}
+                                      <Typography
+                                        variant="caption"
+                                        sx={{ fontWeight: 700, color: isSent ? "#0d47a1" : "#1b5e20" }}
+                                      >
+                                        {isSent ? "Sent by You" : "Vendor Reply"}
+                                      </Typography>
 
-                            <Box mt={2}>
-                              <Typography variant="subtitle1">Email Logs</Typography>
-                              {rv.emailLogs?.length === 0 && <em>No emails yet</em>}
-                              {rv.emailLogs?.map((log: any) => (
-                                <Box key={log.id} sx={{ mt: 1, p: 1, borderLeft: "3px solid #1976d2" }}>
-                                  <strong>{log.subject}</strong>
-                                  <div dangerouslySetInnerHTML={{ __html: log.body }} />
-                                  <div style={{ fontSize: "12px", color: "#666" }}>
-                                    {new Date(log.createdAt).toLocaleString()}
-                                  </div>
-                                </Box>
-                              ))}
-                            </Box>
+                                      {/* Subject */}
+                                      <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: 600 }}>
+                                        {log.subject || "(No Subject)"}
+                                      </Typography>
 
-                            <Box mt={2}>
-                              <Typography variant="subtitle1">Proposals</Typography>
-                              {rv.proposals?.length === 0 && <em>No proposals yet</em>}
-                              {rv.proposals?.map((p: any) => (
-                                <Box key={p.id} sx={{ mt: 1, p: 1, bgcolor: "#f5f5f5", borderRadius: 1 }}>
-                                  <div><strong>Submitted:</strong> {new Date(p.submittedAt).toLocaleString()}</div>
-                                  <div><strong>Raw:</strong> {p.rawText}</div>
-                                </Box>
-                              ))}
+                                      {/* Body */}
+                                      <Box
+                                        sx={{ mt: 1 }}
+                                        dangerouslySetInnerHTML={{
+                                          __html: log.body || "<i>(Empty message)</i>"
+                                        }}
+                                      />
+
+                                      {/* Timestamp */}
+                                      <Typography
+                                        variant="caption"
+                                        sx={{ display: "block", mt: 1, color: "#777" }}
+                                      >
+                                        {new Date(log.createdAt).toLocaleString()}
+                                      </Typography>
+                                    </Box>
+                                  );
+                                })}
                             </Box>
                           </Box>
                         </Collapse>

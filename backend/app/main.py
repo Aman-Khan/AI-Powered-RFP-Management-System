@@ -2,13 +2,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.prisma import prisma
-from app.api import rfp, vendor, email, user, rfp_vendor
-
+from app.api import rfp, vendor, email, user, rfp_vendor, proposal, email_log
+from fastapi import FastAPI
+from app.tasks.email_sync import sync_email_loop
+import asyncio
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await prisma.connect()
     print("Prisma connected.")
+    
+    # 🚀 Start background email sync task
+    # loop = asyncio.get_event_loop()
+    # loop.create_task(sync_email_loop(interval=20))
     
     yield
     
@@ -33,4 +39,6 @@ app.include_router(rfp.router, prefix="/rfp")
 app.include_router(vendor.router, prefix="/vendor")
 app.include_router(email.router, prefix="/email")
 app.include_router(user.router, prefix="/user")
+app.include_router(proposal.router, prefix="/proposal")
 app.include_router(rfp_vendor.router, prefix="/rfp-vendor")
+app.include_router(email_log.router, prefix="/logs")

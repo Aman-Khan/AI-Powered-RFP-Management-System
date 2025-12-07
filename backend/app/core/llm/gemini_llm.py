@@ -7,6 +7,25 @@ class GeminiLLM(BaseLLM):
         genai.configure(api_key=settings.GEMINI_API_KEY)
         self.model = genai.GenerativeModel("models/gemini-flash-latest", generation_config={"response_mime_type": "application/json"})
 
+    async def is_proposal_email(self, text: str) -> bool:
+      """
+      Uses LLM to classify whether email is a vendor PROPOSAL.
+      """
+
+      prompt = f"""
+      Determine whether the following email contains a vendor's commercial PROPOSAL or quotation.
+      Respond ONLY with "YES" or "NO".
+
+      Email:
+      {text}
+      """
+
+      response = self.model.generate_content(prompt)
+
+      ans = response.text.strip().upper()
+
+      return ans == "YES"
+
     async def generate_rfp_structure(self, text: str):
         prompt = f"""
         Convert this procurement text into STRICT JSON:

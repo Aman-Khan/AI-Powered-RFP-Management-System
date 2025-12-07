@@ -9,3 +9,7 @@ class BaseLLM(ABC):
     @abstractmethod
     async def extract_vendor_proposal(self, raw_text: str):
         pass
+    
+    @abstractmethod
+    async def is_proposal_email(self, raw_text: str):
+        pass

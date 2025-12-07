@@ -66,6 +66,7 @@ model Proposal {
 
 model EmailLog {
   id            String   @id @default(uuid())
+  uid BigInt @unique
   rfpVendorId   String?
   direction     String
   subject       String?

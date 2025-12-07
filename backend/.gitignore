@@ -94,3 +94,6 @@ postgres_data/
 # ===========================
 *.log
 logs/
+
+
+attachments/
