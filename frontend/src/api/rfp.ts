@@ -45,3 +45,13 @@ export const useGenerateEmail = () => {
     },
   });
 };
+
+export const useAllRfps = () => {
+  return useQuery({
+    queryKey: ["rfps-tree"],
+    queryFn: async () => {
+      const response = await api.get("/rfp/rfps-tree"); // your FastAPI endpoint
+      return response.data;
+    },
+  });
+};

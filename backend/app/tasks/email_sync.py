@@ -167,7 +167,7 @@ async def sync_replies_once():
     }
 
 
-async def sync_email_loop():
+async def sync_email_loop(interval):
     """
     Background loop to sync every 15 seconds.
     """
@@ -179,4 +179,4 @@ async def sync_email_loop():
         except Exception as e:
             print("Email sync error:", e)
 
-        await asyncio.sleep(15)
+        await asyncio.sleep(interval)

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
+from app.core.db_client import prisma
 from app.services.rfp_service import (
     create_rfp, 
     get_all_rfps, 
@@ -17,6 +18,29 @@ from app.services.email_service import (
 )
 
 router = APIRouter(tags=["RFP Management"])
+
+@router.get("/rfps-tree")
+async def get_all_rfps_tree():
+    """
+    Fetch all RFPs with their RFPVendor requests and Proposals.
+    """
+    try:
+        # Fetch all RFPs with nested relations
+        rfps = await prisma.rfp.find_many(
+            include={
+                "rfpVendors": {
+                    "include": {
+                        "vendor": True,     # Include vendor info
+                        "proposals": True   # Include all proposals
+                    }
+                }
+            }
+        )
+
+        return rfps
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Create RFP
 @router.post("/create", response_model=RFPResponse)

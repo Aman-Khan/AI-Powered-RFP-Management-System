@@ -17,6 +17,7 @@ import RfpSendToVendors from "../pages/RFP/RfpSendToVendors";
 // import RfpVendorDetail from "../pages/RFP/RfpVendorDetail";
 // import RfpVendorTree from "../pages/RFP/RfpVendorTree";
 import RfpVendorTable from "../pages/RFPVendor/RfpVendorTable";
+import ProposalTable from "../pages/Proposal/ProposalTable";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -47,11 +48,8 @@ export const router = createBrowserRouter([
 
           // Vendors
           { path: "vendors", element: <VendorList /> },
-
-
-
           // Proposals (Coming Later)
-          { path: "proposals", element: <div>Proposals Screen Coming Soon</div> },
+          { path: "proposals", element: <ProposalTable /> },
         ],
       },
     ],

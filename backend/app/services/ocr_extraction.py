@@ -7,7 +7,7 @@ from PIL import Image
 import pytesseract
 from pdf2image import convert_from_path
 from dateutil import parser as date_parser
-# from app.core.config import settings
+from app.core.config import settings
 
 # Logger
 logger = logging.getLogger("ocr_extraction")
@@ -19,8 +19,7 @@ if not logger.handlers:
     logger.addHandler(ch)
 
 # Tesseract path from env
-# TESSERACT_PATH = settings.TESSERACT_PATH
-TESSERACT_PATH = r"C:\Users\hp\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+TESSERACT_PATH = settings.TESSERACT_PATH
 
 if TESSERACT_PATH:
     pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
@@ -32,8 +31,7 @@ try:
     from google.genai.types import Schema, Type, GenerateContentConfig
     from google.genai.errors import APIError
     
-    # GEMINI_API_KEY = settings.GEMINI_API_KEY
-    GEMINI_API_KEY = "AIzaSyBNUfTQ40PwGpmz2XUh_DzJcAvVNOnjNRk"
+    GEMINI_API_KEY = settings.GEMINI_API_KEY
 
     if GEMINI_API_KEY:
         GEMINI_CLIENT = genai.Client(api_key=GEMINI_API_KEY)
