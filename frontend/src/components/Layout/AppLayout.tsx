@@ -294,7 +294,7 @@ export default function AppLayout() {
 
                     {/* Footer */}
                     <Box sx={{ mt: 4, textAlign: "center", color: "text.secondary" }}>
-                        <Typography variant="caption">© {new Date().getFullYear()} RFP AI — Built with ❤️</Typography>
+                        <Typography variant="caption">© {new Date().getFullYear()} RFP AI </Typography>
                     </Box>
                 </Container>
             </Box>

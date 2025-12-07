@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.core.prisma import prisma
+from app.core.db_client import prisma
+
 from app.api import rfp, vendor, email, user, rfp_vendor, proposal, email_log
 from fastapi import FastAPI
 from app.tasks.email_sync import sync_email_loop

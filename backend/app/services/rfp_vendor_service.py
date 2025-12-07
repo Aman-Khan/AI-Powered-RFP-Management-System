@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.core.prisma import prisma
+from backend.app.core.db_client import prisma
 from app.utils.ids import new_id
 
 

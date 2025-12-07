@@ -3,7 +3,7 @@ import traceback
 from prisma import Json
 from app.services.email_imap_service import fetch_incoming_emails
 from app.utils.email_parser import extract_tracking_id
-from app.core.prisma import prisma
+from app.core.db_client import prisma
 from app.core.llm.factory import get_llm
 from app.services.proposal_processor import process_email_and_attachments
 

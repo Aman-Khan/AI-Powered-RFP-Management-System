@@ -52,4 +52,4 @@ async def delete_proposal_api(proposalId: str):
 @router.delete("/delete/vendor/{rfpVendorId}")
 async def delete_vendor_proposals_api(rfpVendorId: str):
     deleted = await delete_proposals_by_vendor(rfpVendorId)
-    return {"deletedCount": deleted.count}
+    return {"deletedCount": deleted}

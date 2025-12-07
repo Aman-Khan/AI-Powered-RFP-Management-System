@@ -21,5 +21,6 @@ class Settings:
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
 
+    TESSERACT_PATH: str = os.getenv("TESSERACT_PATH")
 
 settings = Settings()

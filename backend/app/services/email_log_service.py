@@ -1,6 +1,6 @@
 # app/services/email_log_service.py
 from prisma import Json
-from app.core.prisma import prisma
+from app.core.db_client import prisma
 
 
 async def get_all_email_logs():
@@ -27,6 +27,6 @@ async def delete_email_log(log_id: str):
 async def delete_all_email_logs():
     """Delete all records from the EmailLog table."""
     result = await prisma.emaillog.delete_many(
-        where={}
+        where={"direction":"incoming"}
     )
     return result

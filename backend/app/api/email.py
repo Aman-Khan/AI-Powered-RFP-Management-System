@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timezone
-from app.core.prisma import prisma
+from app.core.db_client import prisma
 from app.services.email_smtp_service import send_email_smtp
 from app.services.email_imap_service import fetch_incoming_emails
 from app.utils.email_parser import extract_tracking_id

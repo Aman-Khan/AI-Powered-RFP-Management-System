@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from fastapi import HTTPException
 from app.core.llm.factory import get_llm
-from app.core.prisma import prisma
+from app.core.db_client import prisma
 import json
 from app.services.email_smtp_service import send_email_smtp
 from pydantic import BaseModel

@@ -1,7 +1,7 @@
 # app/services/proposal_service.py
 from datetime import datetime
 from prisma import Json
-from app.core.prisma import prisma
+from app.core.db_client import prisma
 from app.utils.ids import new_id
 
 

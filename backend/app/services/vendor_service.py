@@ -1,4 +1,4 @@
-from app.core.prisma import prisma
+from app.core.db_client import prisma
 from app.utils.ids import new_id
 from typing import Optional, Dict, Any, List
 from prisma import Json

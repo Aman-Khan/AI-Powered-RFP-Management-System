@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from typing import Any, Dict, Optional, List
 from prisma import Json
-from app.core.prisma import prisma
+from app.core.db_client import prisma
 from app.core.llm.factory import get_llm
 from app.utils.ids import new_id
 import json

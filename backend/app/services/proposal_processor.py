@@ -1,5 +1,5 @@
 # app/services/proposal_processing.py
-from app.services.rfp_extractor import parse_vendor_response
+from app.services.ocr_extraction import parse_file_service
 import os
 import logging
 import sys
@@ -45,7 +45,8 @@ def process_email_and_attachments(body: str, attachments: list[str]):
                 logger.info(f"Attempting to parse attachment '{path}' as {input_type}...")
                 
                 try:
-                    structured = parse_vendor_response(path, input_type)
+                    structured = parse_file_service(path, input_type)
+
                 except Exception as e:
                     logger.error(f"Error parsing attachment {path}: {e}")
                     
@@ -64,7 +65,7 @@ def process_email_and_attachments(body: str, attachments: list[str]):
     if not structured:
         logger.info("Falling back to parsing the plain email body as text.")
         try:
-            structured = parse_vendor_response(body, "text")
+            structured = parse_file_service(body, "text")
             if structured:
                 logger.info("Successfully extracted proposal from email body.")
             else:
