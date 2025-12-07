@@ -141,7 +141,7 @@ export default function AppLayout() {
                     <ListItemText primary="Vendors" />
                 </ListItem>
 
-                <ListItem
+                {/* <ListItem
                     component={NavLink}
                     to="/users"
                     sx={{
@@ -156,7 +156,7 @@ export default function AppLayout() {
                 >
                     <ListItemIcon><HomeIcon /></ListItemIcon>
                     <ListItemText primary="Users" />
-                </ListItem>
+                </ListItem> */}
 
                 <ListItem
                     component={NavLink}

@@ -1,6 +1,9 @@
 import google.generativeai as genai
 from app.core.llm.base import BaseLLM
 from app.core.config import settings
+from typing import Any, Dict
+import re
+import json
 
 class GeminiLLM(BaseLLM):
     def __init__(self):
@@ -161,3 +164,32 @@ class GeminiLLM(BaseLLM):
 
         resp = self.model.generate_content(prompt)
         return resp.text
+
+    async def generate_json(self, prompt: str) -> Dict[str, Any]:
+        """
+        Sends prompt to Gemini and returns **parsed JSON as dict**.
+        Auto-fixes minor formatting issues.
+        """
+
+        resp = self.model.generate_content(prompt)
+
+        text = resp.text.strip()
+
+        # 1. Remove code fences if model accidentally adds them
+        text = re.sub(r"```json|```", "", text).strip()
+
+        # 2. Try parsing directly
+        try:
+            return json.loads(text)
+
+        except json.JSONDecodeError:
+            # 3. Attempt to extract only the JSON substring
+            json_match = re.search(r"\{.*\}", text, re.DOTALL)
+            if json_match:
+                try:
+                    return json.loads(json_match.group(0))
+                except Exception:
+                    pass
+
+        # 4. Fallback: return text for debugging
+        raise ValueError(f"LLM returned invalid JSON:\n{text}")
