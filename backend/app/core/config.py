@@ -22,5 +22,6 @@ class Settings:
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
 
     TESSERACT_PATH: str = os.getenv("TESSERACT_PATH")
+    POPPLER_PATH: str = os.getenv("POPPLER_PATH")
 
 settings = Settings()

@@ -51,7 +51,7 @@ def _ensure_input_type(input_type: str) -> str:
 
 def _convert_pdf_to_images(pdf_path: str, dpi: int = 200) -> List[Image.Image]:
     try:
-        pages = convert_from_path(pdf_path, dpi=dpi)
+        pages = convert_from_path(pdf_path, dpi=dpi, poppler_path=settings.POPPLER_PATH)
         return pages
     except Exception as e:
         logger.exception("Failed to convert PDF: %s", e)
@@ -293,5 +293,5 @@ def parse_file_service(file_path: str, input_type: str = "image") -> Dict[str, A
 # # -------------------------
 # if __name__ == "__main__":
 #     file_path = r"c:\Users\hp\Desktop\Assessment\AI-Powered-RFP-Management-System\backend\attachments\1.jpeg"
-#     parsed_data = parse_file_service(file_path, input_type="image")
+#     parsed_data = parse_file_service(file_path, input_type="image")File not found
 #     print(json.dumps(parsed_data, indent=2, default=str))

@@ -14,8 +14,8 @@ async def lifespan(app: FastAPI):
     print("Prisma connected.")
     
     # 🚀 Start background email sync task
-    loop = asyncio.get_event_loop()
-    loop.create_task(sync_email_loop(interval=20))
+    # loop = asyncio.get_event_loop()
+    # loop.create_task(sync_email_loop(interval=20))
     
     yield
     
